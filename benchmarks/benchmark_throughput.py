@@ -80,6 +80,7 @@ def run_vllm(
     max_num_batched_tokens: int,
     gpu_memory_utilization: float = 0.9,
     download_dir: Optional[str] = None,
+    max_num_seqs: int = 24
 ) -> float:
     from vllm import LLM, SamplingParams
     llm = LLM(
@@ -100,6 +101,8 @@ def run_vllm(
         download_dir=download_dir,
         enable_chunked_prefill=enable_chunked_prefill,
         max_num_batched_tokens=max_num_batched_tokens,
+        # Dirty hack for batch size limits
+        max_num_seqs=max_num_seqs
     )
 
     # Add the requests to the engine.
@@ -226,7 +229,7 @@ def main(args: argparse.Namespace):
             args.quantization_param_path, args.device,
             args.enable_prefix_caching, args.enable_chunked_prefill,
             args.max_num_batched_tokens, args.gpu_memory_utilization,
-            args.download_dir)
+            args.download_dir, arg.max_batch_size)
     elif args.backend == "hf":
         assert args.tensor_parallel_size == 1
         elapsed_time = run_hf(requests, args.model, tokenizer, args.n,
@@ -290,6 +293,10 @@ if __name__ == "__main__":
                         type=int,
                         default=1000,
                         help="Number of prompts to process.")
+    parser.add_argument("--max-batch-size",
+                        type=int,
+                        default=256,
+                        help="Max number of sequence to process")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--hf-max-batch-size",
                         type=int,
