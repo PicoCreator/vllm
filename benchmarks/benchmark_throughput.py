@@ -229,7 +229,7 @@ def main(args: argparse.Namespace):
             args.quantization_param_path, args.device,
             args.enable_prefix_caching, args.enable_chunked_prefill,
             args.max_num_batched_tokens, args.gpu_memory_utilization,
-            args.download_dir, arg.max_batch_size)
+            args.download_dir, args.max_batch_size)
     elif args.backend == "hf":
         assert args.tensor_parallel_size == 1
         elapsed_time = run_hf(requests, args.model, tokenizer, args.n,
